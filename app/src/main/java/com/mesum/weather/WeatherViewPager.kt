@@ -53,7 +53,7 @@ import java.text.SimpleDateFormat
       val childFragmentManager: FragmentManager,
       val activity: MainActivity,
       val findNanControlle: NavController,
-      callback: FavouriteInterface
+      val callback: FavouriteInterface
   ) : ListAdapter<ForecastModel , WeatherViewPager.RvPagerViewHolder>(  diif ) {
 
     private var weather =ArrayList<ForecastModel>()
@@ -115,7 +115,12 @@ import java.text.SimpleDateFormat
         binding.findViewById<TextView>(R.id.city_name).text = it.location.name
         binding.findViewById<TextView>(R.id.text_down).text = "L:${trimLeadingZeros(it.forecast.forecastday[0].day.mintemp_c)}°"
         binding.findViewById<TextView>(R.id.text_up).text = "H:${trimLeadingZeros(it.forecast.forecastday[0].day.maxtemp_c)}°"
-        
+        binding.findViewById<ImageView>(R.id.fav_screen).setOnClickListener(object : View.OnClickListener{
+            override fun onClick(p0: View?) {
+                callback.favClicked(it.location.name)
+            }
+
+        })
 
         binding.findViewById<TextView>(R.id.temp_textview).text = "${trimLeadingZeros(it.current.temp_c)}°"
       binding.findViewById<ImageView>(R.id.id_ivicon).load( "http:" + it.current.condition.icon)

@@ -32,6 +32,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.mesum.weather.Database.CitysRepository
 import com.mesum.weather.Database.CitysRoomDatabase
 import com.mesum.weather.databinding.FragmentWeatherBinding
+import com.mesum.weather.favourites.FavouriteFragment
 import com.mesum.weather.favourites.FavouriteInterface
 import com.mesum.weather.model.*
 import com.mesum.weather.network.WeatherInterface
@@ -219,7 +220,12 @@ class WeatherFragment : Fragment(), FavouriteInterface {
                 val distinc = arraytemp.distinct()
                 weatherViewPager = WeatherViewPager(weatherlist = arraytemp, viewModel = viewModel, ctx = requireContext(), childFragmentManager = childFragmentManager , activity =  activity as MainActivity, findNanControlle = findNavController(), callback = object : FavouriteInterface{
                     override fun favClicked(cityName: String) {
-                        Toast.makeText(context, cityName.toString(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "$cityName added to favourite", Toast.LENGTH_SHORT).show()
+                        val favoriteFragment = FavouriteFragment()
+                        val bundle = Bundle()
+                        bundle.putString("cityName", cityName)
+                        favoriteFragment.arguments = bundle
+                        findNavController().navigate(R.id.favouriteFragment)
                     }
 
                 })
