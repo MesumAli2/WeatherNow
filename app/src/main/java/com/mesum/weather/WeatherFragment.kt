@@ -221,11 +221,9 @@ class WeatherFragment : Fragment(), FavouriteInterface {
                 weatherViewPager = WeatherViewPager(weatherlist = arraytemp, viewModel = viewModel, ctx = requireContext(), childFragmentManager = childFragmentManager , activity =  activity as MainActivity, findNanControlle = findNavController(), callback = object : FavouriteInterface{
                     override fun favClicked(cityName: String) {
                         Toast.makeText(context, "$cityName added to favourite", Toast.LENGTH_SHORT).show()
-                        val favoriteFragment = FavouriteFragment()
                         val bundle = Bundle()
                         bundle.putString("cityName", cityName)
-                        favoriteFragment.arguments = bundle
-                        findNavController().navigate(R.id.favouriteFragment)
+                        findNavController().navigate(R.id.favouriteFragment, bundle)
                     }
 
                 })

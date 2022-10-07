@@ -1,0 +1,39 @@
+package com.mesum.weather.favourites.adapter
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.mesum.weather.R
+import com.mesum.weather.model.ForecastModel
+
+class FavouriteViewHolder(val view: View) : RecyclerView.ViewHolder(view)
+val diff = object : DiffUtil.ItemCallback<ForecastModel>(){
+    override fun areItemsTheSame(oldItem: ForecastModel, newItem: ForecastModel): Boolean {
+       return oldItem== newItem
+    }
+
+    override fun areContentsTheSame(oldItem: ForecastModel, newItem: ForecastModel): Boolean {
+        return oldItem.location.name == newItem.location.name
+    }
+
+}
+class FavouriteAdapter : ListAdapter<ForecastModel, FavouriteViewHolder>( diff ) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouriteViewHolder {
+        return FavouriteViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.fav_item, parent, false))
+    }
+
+    override fun onBindViewHolder(holder: FavouriteViewHolder, position: Int) {
+        val result = getItem(position)
+        val cityname = holder.itemView.findViewById<TextView>(R.id.city_name)
+        cityname.text = result.location.name
+        val temp = holder.itemView.findViewById<TextView>(R.id.city_temp)
+        temp.text = result.current.temp_c.toString()
+
+
+    }
+
+}
