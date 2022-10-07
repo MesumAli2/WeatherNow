@@ -27,10 +27,12 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.mesum.weather.favourites.FavouriteInterface
 import com.mesum.weather.model.ForecastModel
 import com.mesum.weather.model.Forecastday
 import com.mesum.weather.model.Hour
 import com.mesum.weather.model.WeatherViewModel
+import com.mesum.weather.network.WeatherInterface
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 
@@ -44,9 +46,15 @@ import java.text.SimpleDateFormat
     }
 
 }
-  class WeatherViewPager (val weatherlist : ArrayList<ForecastModel>, val viewModel : WeatherViewModel, val ctx : Context,
-                             val childFragmentManager: FragmentManager,val  activity: MainActivity, val findNanControlle: NavController
-    ) : ListAdapter<ForecastModel , WeatherViewPager.RvPagerViewHolder>(  diif ) {
+  class WeatherViewPager(
+      val weatherlist: ArrayList<ForecastModel>,
+      val viewModel: WeatherViewModel,
+      val ctx: Context,
+      val childFragmentManager: FragmentManager,
+      val activity: MainActivity,
+      val findNanControlle: NavController,
+      callback: FavouriteInterface
+  ) : ListAdapter<ForecastModel , WeatherViewPager.RvPagerViewHolder>(  diif ) {
 
     private var weather =ArrayList<ForecastModel>()
   //  private lateinit var viewPager : ViewPager
@@ -89,7 +97,8 @@ import java.text.SimpleDateFormat
                 val display =  input.parse(result.time)
                 holder.itemView.findViewById<TextView>(R.id.timenow).text = output.format(display)
                 holder.itemView.findViewById<TextView>(R.id.temp).text = "${trimLeadingZeros(result.temp_c)}°"
-                holder.itemView.findViewById<TextView>(R.id.wind_speed).text = "${trimLeadingZeros(result.wind_kph)} km/h"                }
+                holder.itemView.findViewById<TextView>(R.id.wind_speed).text = "${trimLeadingZeros(result.wind_kph)} km/h"
+            }
 
         }
 
@@ -106,6 +115,7 @@ import java.text.SimpleDateFormat
         binding.findViewById<TextView>(R.id.city_name).text = it.location.name
         binding.findViewById<TextView>(R.id.text_down).text = "L:${trimLeadingZeros(it.forecast.forecastday[0].day.mintemp_c)}°"
         binding.findViewById<TextView>(R.id.text_up).text = "H:${trimLeadingZeros(it.forecast.forecastday[0].day.maxtemp_c)}°"
+        
 
         binding.findViewById<TextView>(R.id.temp_textview).text = "${trimLeadingZeros(it.current.temp_c)}°"
       binding.findViewById<ImageView>(R.id.id_ivicon).load( "http:" + it.current.condition.icon)
