@@ -241,17 +241,17 @@ class WeatherFragment : Fragment(), FavouriteInterface {
                     viewpager.scrollToPosition(distinc.size - 1  )
 
                 }
+                if (!arguments?.getString("favsCity").isNullOrEmpty()){
+                   var temparr = arrayListOf<String>()
+                    for ( i in  arraytemp){
+                        if (i.location.name !=arguments?.getString("favsCity") ){
+                            arraytemp
+                        }
+                    }
+                }
                 viewpager.removeItemDecoration(CirclePagerIndicatorDecoration())
-
                 viewpager.addItemDecoration(CirclePagerIndicatorDecoration())
-              //  val indicator = binding.indicator
-                    //  indicator.setViewPager(viewpager)
-               // weatherViewPager.registerAdapterDataObserver(indicator.getAdapterDataObserver());
 
-               // val recyclerIndicator: ScrollingPagerIndicator = binding.indicator
-               // recyclerIndicator.attachToRecyclerView(recyclerView)
-              //  recyclerIndicator.add(viewpager)
-            //    weatherViewPager = this.context?.let { it1 -> WeatherViewPager(it1, arraytemp) }
                 Log.d("WeatherResponse", arraytemp.toString())
 
 
@@ -270,7 +270,14 @@ class WeatherFragment : Fragment(), FavouriteInterface {
         }*/
 
     }
-
+    private fun <T> getItemImpl(list: List<T>, item: T): Int {
+        list.forEachIndexed { index, it ->
+            if (it == item)
+                return index
+        }
+        return -1
+    }
+    public fun ArrayList<String>.getItemPositionByName(item: String) = getItemImpl(this, item)
 
     private fun showInputMethod(view: View) {
         val imm: InputMethodManager? = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

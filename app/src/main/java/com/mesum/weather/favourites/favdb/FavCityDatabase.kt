@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [FavCitys::class], version = 1 , exportSchema = false)
+@Database(entities = [FavCitys::class], version = 2 , exportSchema = false)
   abstract class FavCityDatabase : RoomDatabase(){
     abstract fun FavDao(): FavDao
     companion object{
@@ -18,7 +18,8 @@ import androidx.room.RoomDatabase
                     context.applicationContext,
                     FavCityDatabase::class.java,
                     "fav_database"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                    .build()
 
                 INSTANCE = instance
                 //return instance
