@@ -2,17 +2,16 @@ package com.mesum.weather
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
+import android.os.UserManager
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.DiffUtil
@@ -54,7 +53,10 @@ val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
       val childFragmentManager: FragmentManager,
       val activity: MainActivity,
       val findNanControlle: NavController,
-      val callback: FavouriteInterface
+      val callback: FavouriteInterface,
+      val sharedPref: SharedPreferences,
+         val  tempvalue: String
+
   ) : ListAdapter<ForecastModel , WeatherViewPager.RvPagerViewHolder>(  diif ) {
 
     private var weather =ArrayList<ForecastModel>()
@@ -77,8 +79,10 @@ val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
     }
 
 
-    private fun setUi(it: ForecastModel, binding: View) {
-        
+    private fun setUi(it: ForecastModel, binding: View, sharedPref: SharedPreferences, ctx: Context, tempvalue: String) {
+
+
+        if (tempvalue == ctx.getString(R.string.celsius)){
         val recyclerViewAdapterforecasat = object : ListAdapter<Hour, WeatherFragment.RvViewHolder>(diif ){
 
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherFragment.RvViewHolder {
@@ -86,6 +90,9 @@ val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
                     LayoutInflater.from(parent.context).inflate(R.layout.weather_rv_item, parent, false)
                 )
             }
+
+
+
 
             override fun onBindViewHolder(holder: WeatherFragment.RvViewHolder, position: Int) {
 
@@ -101,6 +108,36 @@ val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
                 holder.itemView.findViewById<TextView>(R.id.wind_speed).text = "${trimLeadingZeros(result.wind_kph)} km/h"
             }
 
+        }
+        binding.findViewById<ImageView>(R.id.ivOption).setOnClickListener {
+            val popup = PopupMenu(ctx, it)
+            val inflater: MenuInflater = popup.menuInflater
+            inflater.inflate(R.menu.change_preference, popup.menu)
+            popup.show()
+            popup.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener{
+                override fun onMenuItemClick(item: MenuItem?): Boolean {
+                     if (item?.itemId == R.id.iv_celcius) {
+                        with (sharedPref!!.edit()) {
+                            putString("tempType","Celsius")
+                            apply()
+                        }
+
+                         notifyDataSetChanged()
+                       return true
+                    }
+                    if (item?.itemId == R.id.iv_farhentie) {
+                        with (sharedPref!!.edit()) {
+                            putString("tempType","Celsius")
+                            apply()
+                            notifyDataSetChanged()
+                        }
+                       return false
+                    }    else{
+                        return false
+                    }
+                }
+
+            })
         }
 
         setForecast(it.forecast.forecastday, binding)
@@ -175,7 +212,7 @@ val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
 
 
        val rvWeather = binding.findViewById<RecyclerView>(R.id.RvWeather)
-          rvWeather.adapter = recyclerViewAdapterforecasat
+        rvWeather.adapter = recyclerViewAdapterforecasat
         rvWeather.addOnItemTouchListener(object : OnItemTouchListener {
             override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
                 val action = e.action
@@ -197,7 +234,158 @@ val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
         binding.findViewById<TextView>(R.id.wind_degree).text = it.current.wind_degree.toString()
         binding.findViewById<TextView>(R.id.wing_gust).text = "${trimLeadingZeros(it.current.gust_kph)} kmh"
 
+        }else{
+            val recyclerViewAdapterforecasat = object : ListAdapter<Hour, WeatherFragment.RvViewHolder>(diif ){
 
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherFragment.RvViewHolder {
+                    return WeatherFragment.RvViewHolder(
+                        LayoutInflater.from(parent.context).inflate(R.layout.weather_rv_item, parent, false)
+                    )
+                }
+
+
+
+
+                override fun onBindViewHolder(holder: WeatherFragment.RvViewHolder, position: Int) {
+
+                    val result = getItem(position)
+
+                    holder.itemView.findViewById<ImageView>(R.id.cdn).load("http:" + result.condition.icon)
+
+                    val input = SimpleDateFormat("yyyy-MM-DD hh:mm")
+                    val output = SimpleDateFormat("h aa")
+                    val display =  input.parse(result.time)
+                    holder.itemView.findViewById<TextView>(R.id.timenow).text = output.format(display)
+                    holder.itemView.findViewById<TextView>(R.id.temp).text = "${trimLeadingZeros(result.temp_f)}°"
+                    holder.itemView.findViewById<TextView>(R.id.wind_speed).text = "${trimLeadingZeros(result.wind_mph)} km/h"
+                }
+
+            }
+            binding.findViewById<ImageView>(R.id.ivOption).setOnClickListener {
+                val popup = PopupMenu(ctx, it)
+                val inflater: MenuInflater = popup.menuInflater
+                inflater.inflate(R.menu.change_preference, popup.menu)
+                popup.show()
+                popup.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener{
+                    override fun onMenuItemClick(item: MenuItem?): Boolean {
+                        if (item?.itemId == R.id.iv_celcius) {
+                            with (sharedPref!!.edit()) {
+                                putString("tempType",ctx.getString(R.string.celsius))
+                                apply()
+                            }
+
+                            notifyDataSetChanged()
+                            return true
+                        }
+                        if (item?.itemId == R.id.iv_farhentie) {
+                            with (sharedPref!!.edit()) {
+                                putString("tempType",ctx.getString(R.string.fahrenheit))
+                                apply()
+                                notifyDataSetChanged()
+                            }
+                            return false
+                        }    else{
+                            return false
+                        }
+                    }
+
+                })
+            }
+
+            setForecast(it.forecast.forecastday, binding)
+            val weatherRvHourly = arrayListOf<Hour>()
+            binding.findViewById<ImageView>(R.id.add_weathera).setOnClickListener {
+                findNanControlle.navigate(R.id.addFragment)
+            }
+
+            binding.findViewById<TextView>(R.id.temp_textview).setOnClickListener {
+                viewModel.deleteAll()
+            }
+
+            binding.findViewById<TextView>(R.id.city_name).text = it.location.name
+            binding.findViewById<TextView>(R.id.text_down).text = "L:${trimLeadingZeros(it.forecast.forecastday[0].day.mintemp_f)}°"
+            binding.findViewById<TextView>(R.id.text_up).text = "H:${trimLeadingZeros(it.forecast.forecastday[0].day.mintemp_f)}°"
+            binding.findViewById<ImageView>(R.id.fav_screen).setOnClickListener(object : View.OnClickListener{
+                override fun onClick(p0: View?) {
+                    callback.favClicked(it.location.name)
+                }
+
+            })
+
+            binding.findViewById<TextView>(R.id.temp_textview).text = "${trimLeadingZeros(it.current.temp_f)}°"
+            binding.findViewById<ImageView>(R.id.id_ivicon).load( "http:" + it.current.condition.icon)
+            binding.findViewById<TextView>(R.id.id_condition).text = it.current.condition.text
+            val timelist = mutableListOf<String>()
+
+            Log.d("WeatherResponse", it.location.localtime.toString())
+            //add time to weatherlist array
+            for (i in it.forecast.forecastday[0].hour){
+                val input = SimpleDateFormat("yyyy-MM-DD hh:mm")
+                val output = SimpleDateFormat("hh aa")
+                val display =  input.parse(i.time)
+                val weatherTimes =  output.format(display)
+
+                timelist.add(weatherTimes)
+
+            }
+            val input = SimpleDateFormat("yyyy-MM-DD hh:mm")
+            val output = SimpleDateFormat("hh aa")
+            val display =  input.parse(it.location.localtime)
+            val currentTime =  output.format(display)
+
+            val index = timelist.indexOf(currentTime)
+            for (i in index + 1 until it.forecast.forecastday[0].hour.size){
+                weatherRvHourly.add(it.forecast.forecastday[0].hour[i])
+            }
+            if (weatherRvHourly.size > 9){
+                recyclerViewAdapterforecasat.submitList(weatherRvHourly)
+
+
+            }else{
+                weatherRvHourly.addAll(it.forecast.forecastday[1].hour)
+                recyclerViewAdapterforecasat.submitList(weatherRvHourly)
+
+            }
+            setGraph(it, binding, index)
+
+            recyclerViewAdapterforecasat.notifyDataSetChanged()
+            //  weatherRvHourly.addAll(it.forecast.forecastday[0].hour)
+            binding.findViewById<TextView>(R.id.sunrise).text = it.forecast.forecastday[0].astro.sunrise.toString()
+            binding.findViewById<TextView>(R.id.sunset).text = it.forecast.forecastday[0].astro.sunset.toString()
+            binding.findViewById<TextView>(R.id.uv_index).text = "${trimLeadingZeros(it.current.uv)}"
+            binding.findViewById<TextView>(R.id.humidity).text = "${it.current.humidity}%"
+            binding.findViewById<TextView>(R.id.feelikelltextview).text = "${trimLeadingZeros(it.current.feelslike_f)}°"
+
+            binding.findViewById<TextView>(R.id.visibilitytextview).text = "${trimLeadingZeros(it.current.vis_km)}km"
+
+            // binding.findViewById<LinearLayout>(R.id.feelsikell).text = "${trimLeadingZeros(it.current.feelslike_c)}°"
+
+            buildGraph(weatherRvHourly, binding)
+
+
+            val rvWeather = binding.findViewById<RecyclerView>(R.id.RvWeather)
+            rvWeather.adapter = recyclerViewAdapterforecasat
+            rvWeather.addOnItemTouchListener(object : OnItemTouchListener {
+                override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                    val action = e.action
+                    when (action) {
+                        MotionEvent.ACTION_MOVE -> rv.parent.requestDisallowInterceptTouchEvent(true)
+                    }
+                    return false
+                }
+
+                override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+                override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+            })
+            setBackGround(it.current.is_day, binding, it.current.condition.text.toString(), it)
+            Log.d("WeatherResponse", it.toString())
+
+            //  setMap(it.location.lat, it.location.lon, it.current.is_day, binding)
+            binding.findViewById<TextView>(R.id.wind_speed).text = "${trimLeadingZeros(it.current.wind_kph)} kmh"
+            binding.findViewById<TextView>(R.id.wind_direction).text = "${it.current.wind_dir.toString()} "
+            binding.findViewById<TextView>(R.id.wind_degree).text = it.current.wind_degree.toString()
+            binding.findViewById<TextView>(R.id.wing_gust).text = "${trimLeadingZeros(it.current.gust_kph)} kmh"
+        }
 
 
 
@@ -391,7 +579,7 @@ val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
     override fun onBindViewHolder(holder: RvPagerViewHolder, position: Int) {
        // holder.itemView.findViewById<TextView>(R.id.temp_textview).text = weatherlist.get(position).current.temp_c.toString()
 
-        setUi(getItem(position), holder.itemView)
+        setUi(getItem(position), holder.itemView, sharedPref, ctx, tempvalue)
     }
 
     override fun getItemCount(): Int {

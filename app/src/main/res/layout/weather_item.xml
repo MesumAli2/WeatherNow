@@ -193,6 +193,21 @@
                         android:padding="16dp"
                         android:src="@drawable/ic_baseline_favorite_24" />
 
+                    <ImageView
+                        android:id="@+id/ivOption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/fav_screen"
+                        android:layout_alignParentEnd="true"
+                        android:padding="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="TODO"
+                        android:focusable="true"
+                        android:src="@drawable/ic_baseline_settings_24"
+
+                        android:tint="@color/white" />
+
+
                     <TextView
                         android:id="@+id/id_condition"
                         android:layout_width="match_parent"

@@ -3,6 +3,7 @@ package com.mesum.weather
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
@@ -21,26 +22,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.OnCompleteListener
-
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mesum.weather.Database.CitysRepository
 import com.mesum.weather.Database.CitysRoomDatabase
 import com.mesum.weather.databinding.FragmentWeatherBinding
-import com.mesum.weather.favourites.FavouriteFragment
 import com.mesum.weather.favourites.FavouriteInterface
 import com.mesum.weather.model.*
-import com.mesum.weather.network.WeatherInterface
 import java.io.IOException
 import java.text.DecimalFormat
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class WeatherFragment : Fragment(), FavouriteInterface {
@@ -58,6 +52,8 @@ class WeatherFragment : Fragment(), FavouriteInterface {
     private lateinit var weatherViewPager : WeatherViewPager
     private var cityNameLocation : String? = null
     private var weatherClick : FavouriteInterface? = null
+    lateinit var sharedPref : SharedPreferences
+    var tempvalue = "°C"
 
 
 
@@ -69,45 +65,8 @@ class WeatherFragment : Fragment(), FavouriteInterface {
     class RvViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
 
-    val diif  =  object  : DiffUtil.ItemCallback<Hour>(){
-        override fun areItemsTheSame(oldItem: Hour, newItem: Hour): Boolean {
-            return oldItem == newItem
-        }
 
-        override fun areContentsTheSame(oldItem: Hour, newItem: Hour): Boolean {
-            return oldItem.time == newItem.time
-        }
 
-    }
-
-    val diif2  =  object  : DiffUtil.ItemCallback<Forecastday>(){
-        override fun areItemsTheSame(oldItem: Forecastday, newItem: Forecastday): Boolean {
-            return oldItem == newItem
-        }
-
-        override fun areContentsTheSame(oldItem: Forecastday, newItem: Forecastday): Boolean {
-            return oldItem.day.avgtemp_c == newItem.day.avgtemp_c
-        }
-
-    }
-    val recyclerViewAdapter = object : ListAdapter<Hour,RvViewHolder>(diif ){
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RvViewHolder {
-            return RvViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.weather_rv_item, parent, false))
-        }
-
-        override fun onBindViewHolder(holder: RvViewHolder, position: Int) {
-            val result = getItem(position)
-            holder.itemView.findViewById<ImageView>(R.id.cdn).load("http:" + result.condition.icon)
-            val input = SimpleDateFormat("yyyy-MM-DD hh:mm")
-            val output = SimpleDateFormat("h aa")
-            val display =  input.parse(result.time)
-            holder.itemView.findViewById<TextView>(R.id.Time).text = output.format(display)
-            holder.itemView.findViewById<TextView>(R.id.temp).text = "${trimLeadingZeros(result.temp_c)}°"
-            holder.itemView.findViewById<TextView>(R.id.wind_speed).text = "${trimLeadingZeros(result.wind_kph)} km/h"
-        }
-
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -124,6 +83,21 @@ class WeatherFragment : Fragment(), FavouriteInterface {
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        sharedPref = requireActivity()?.getPreferences(Context.MODE_PRIVATE)
+        val tempCelsius = sharedPref.getString(getString(R.string.celsius), "")
+
+        val tempFahrenheit = sharedPref.getString(getString(R.string.fahrenheit), "")
+        if (!tempCelsius.isNullOrEmpty()){
+
+
+            tempvalue = tempCelsius
+        }
+        if (!tempFahrenheit.isNullOrEmpty()){
+
+            tempvalue = tempFahrenheit
+        }
+
+
 
         weatherClick = this
 
@@ -139,7 +113,7 @@ class WeatherFragment : Fragment(), FavouriteInterface {
             // Log and toast
             val msg = "Firebase token is $token"
             Log.d(TAG, msg)
-            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+           // Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
         })
         activity?.window?.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
@@ -227,7 +201,7 @@ class WeatherFragment : Fragment(), FavouriteInterface {
                         findNavController().navigate(R.id.favouriteFragment, bundle)
                     }
 
-                })
+                }, sharedPref, tempvalue)
                 weatherViewPager.submitList(distinc)
                 rvMain.smoothScrollBy(10,10)
 
