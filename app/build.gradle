@@ -39,6 +39,15 @@ android {
     buildFeatures{
         viewBinding = true
     }
+    flavorDimensions 'env'
+    productFlavors {
+        staging {
+            dimension 'env'
+        }
+        production {
+            dimension 'env'
+        }
+    }
 }
 
 dependencies {
