@@ -5,19 +5,20 @@ import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
+import androidx.recyclerview.widget.RecyclerView.OnItemTouchListener
 import coil.load
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -32,11 +33,11 @@ import com.mesum.weather.model.ForecastModel
 import com.mesum.weather.model.Forecastday
 import com.mesum.weather.model.Hour
 import com.mesum.weather.model.WeatherViewModel
-import com.mesum.weather.network.WeatherInterface
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 
-    val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
+
+val diif  =  object  : DiffUtil.ItemCallback<ForecastModel>(){
         override fun areItemsTheSame(oldItem: ForecastModel, newItem: ForecastModel): Boolean {
             return oldItem == newItem
         }
@@ -47,7 +48,7 @@ import java.text.SimpleDateFormat
 
 }
   class WeatherViewPager(
-      val weatherlist: ArrayList<ForecastModel>,
+      val weatherlist: List<ForecastModel>,
       val viewModel: WeatherViewModel,
       val ctx: Context,
       val childFragmentManager: FragmentManager,
@@ -173,7 +174,20 @@ import java.text.SimpleDateFormat
        buildGraph(weatherRvHourly, binding)
 
 
-        binding.findViewById<RecyclerView>(R.id.RvWeather).adapter = recyclerViewAdapterforecasat
+       val rvWeather = binding.findViewById<RecyclerView>(R.id.RvWeather)
+          rvWeather.adapter = recyclerViewAdapterforecasat
+        rvWeather.addOnItemTouchListener(object : OnItemTouchListener {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                val action = e.action
+                when (action) {
+                    MotionEvent.ACTION_MOVE -> rv.parent.requestDisallowInterceptTouchEvent(true)
+                }
+                return false
+            }
+
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
        setBackGround(it.current.is_day, binding, it.current.condition.text.toString(), it)
         Log.d("WeatherResponse", it.toString())
 
@@ -533,7 +547,23 @@ import java.text.SimpleDateFormat
        // binding.weatherForecast.visibility = View.VISIBLE
 
         rvAdapter.submitList(forecastday)
-        binding.findViewById<RecyclerView>(R.id.rv_forecast).adapter = rvAdapter
+       val rvForecast = binding.findViewById<RecyclerView>(R.id.rv_forecast)
+        rvForecast.isNestedScrollingEnabled = false
+        rvForecast.adapter = rvAdapter
+        rvForecast.addOnItemTouchListener(object : OnItemTouchListener {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                val action = e.action
+                when (action) {
+                    MotionEvent.ACTION_MOVE -> rv.parent.requestDisallowInterceptTouchEvent(true)
+                }
+                return false
+            }
+
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
+       // ViewCompat.setNestedScrollingEnabled(rvForecast, false);
+
 
 
     }

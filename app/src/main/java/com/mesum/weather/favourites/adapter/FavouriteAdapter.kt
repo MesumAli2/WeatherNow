@@ -3,10 +3,12 @@ package com.mesum.weather.favourites.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.mesum.weather.R
 import com.mesum.weather.favourites.FavouriteInterface
 import com.mesum.weather.model.ForecastModel
@@ -35,6 +37,8 @@ class FavouriteAdapter(val favCallBack: FavouriteInterface) : ListAdapter<Foreca
         cityname.text = result.location.name
         val temp = holder.itemView.findViewById<TextView>(R.id.city_temp)
         temp.text = result.current.temp_c.toString()
+        val image =  holder.itemView.findViewById<ImageView>(R.id.img_cond)
+        image.load("http:" + result.current.condition.icon)
         holder.itemView.setOnClickListener {
                 favCallBack.favClicked(result.location.name)
         }

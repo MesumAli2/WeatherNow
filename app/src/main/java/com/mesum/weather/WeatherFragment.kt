@@ -40,6 +40,7 @@ import java.io.IOException
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class WeatherFragment : Fragment(), FavouriteInterface {
@@ -179,7 +180,7 @@ class WeatherFragment : Fragment(), FavouriteInterface {
 
      //   setupUIInteraction()
 
-        val viewpager = binding.viewPager
+        val rvMain = binding.viewPager
         val arraytemp = arrayListOf<ForecastModel>()
 
         viewModel.allCitys.observe(viewLifecycleOwner){
@@ -218,7 +219,7 @@ class WeatherFragment : Fragment(), FavouriteInterface {
                }
 
                 val distinc = arraytemp.distinct()
-                weatherViewPager = WeatherViewPager(weatherlist = arraytemp, viewModel = viewModel, ctx = requireContext(), childFragmentManager = childFragmentManager , activity =  activity as MainActivity, findNanControlle = findNavController(), callback = object : FavouriteInterface{
+                weatherViewPager = WeatherViewPager(weatherlist = arraytemp.distinct(), viewModel = viewModel, ctx = requireContext(), childFragmentManager = childFragmentManager , activity =  activity as MainActivity, findNanControlle = findNavController(), callback = object : FavouriteInterface{
                     override fun favClicked(cityName: String) {
                         Toast.makeText(context, "$cityName added to favourite", Toast.LENGTH_SHORT).show()
                         val bundle = Bundle()
@@ -228,29 +229,31 @@ class WeatherFragment : Fragment(), FavouriteInterface {
 
                 })
                 weatherViewPager.submitList(distinc)
-                viewpager.smoothScrollBy(10,10)
+                rvMain.smoothScrollBy(10,10)
 
 
                 weatherViewPager.notifyDataSetChanged()
-                viewpager.setAdapter(weatherViewPager)
+                rvMain.setAdapter(weatherViewPager)
                // viewpager.setLayoutManager(ViewPagerLayoutManager);
               //  val snapHelper = GravitySnapHelper(Gravity.START)
              //   snapHelper.attachToRecyclerView(viewpager)
 
                 if (arguments?.getBoolean("Added") == true){
-                    viewpager.scrollToPosition(distinc.size - 1  )
+                    rvMain.scrollToPosition(distinc.size - 1  )
 
                 }
                 if (!arguments?.getString("favsCity").isNullOrEmpty()){
                    var temparr = arrayListOf<String>()
+                    var postion = 0
                     for ( i in  arraytemp){
-                        if (i.location.name !=arguments?.getString("favsCity") ){
-                            arraytemp
+                        postion ++
+                        if (i.location.name ==arguments?.getString("favsCity") ){
+                            rvMain.scrollToPosition(postion - 1)
                         }
                     }
                 }
-                viewpager.removeItemDecoration(CirclePagerIndicatorDecoration())
-                viewpager.addItemDecoration(CirclePagerIndicatorDecoration())
+                rvMain.removeItemDecoration(CirclePagerIndicatorDecoration())
+                rvMain.addItemDecoration(CirclePagerIndicatorDecoration())
 
                 Log.d("WeatherResponse", arraytemp.toString())
 
@@ -270,6 +273,7 @@ class WeatherFragment : Fragment(), FavouriteInterface {
         }*/
 
     }
+
     private fun <T> getItemImpl(list: List<T>, item: T): Int {
         list.forEachIndexed { index, it ->
             if (it == item)
